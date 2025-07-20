@@ -1,9 +1,22 @@
 import requests
-from PIL import Image
+from PIL import Image, ImageEnhance
 import pandas as pd
+import io
 
 def extract_text(image_file):
-    api_key = "K85885739088957"  # Pakai API key kamu
+    api_key = "K85885739088957"  # <- Ganti jika API-nya limit
+
+    # 1. Preprocessing: convert to grayscale & enhance contrast
+    image = Image.open(image_file).convert("L")  # Grayscale
+    enhancer = ImageEnhance.Contrast(image)
+    enhanced_image = enhancer.enhance(2.0)  # Perkuat kontras 2x
+
+    # 2. Simpan ke buffer
+    img_bytes = io.BytesIO()
+    enhanced_image.save(img_bytes, format='PNG')
+    img_bytes.seek(0)
+
+    # 3. Kirim ke OCR.Space API
     payload = {
         'isOverlayRequired': False,
         'apikey': api_key,
@@ -11,12 +24,13 @@ def extract_text(image_file):
     }
 
     files = {
-        'file': (image_file.name, image_file.getvalue())
+        'file': ('image.png', img_bytes.getvalue())
     }
 
     response = requests.post('https://api.ocr.space/parse/image',
                              data=payload,
                              files=files)
+
     result = response.json()
 
     try:
