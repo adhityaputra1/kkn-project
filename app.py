@@ -2,6 +2,8 @@ import streamlit as st
 from utils import extract_text, save_to_excel
 from ocr_parser import parse_sppt_text
 
+import pytesseract
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 
 
